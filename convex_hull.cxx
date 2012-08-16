@@ -2,23 +2,16 @@
 // dependencies:
 //      CGAL   : for convex hull computation
 //      PCL    : for reading pcd input
-
-#include "file_util.h"
-
 #include <CGAL/Simple_cartesian.h>
-#include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
-#include <CGAL/IO/Polyhedron_iostream.h>
-#include <CGAL/IO/Polyhedron_VRML_1_ostream.h> 
 
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
 #include <vector>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+
+#include "file_util.h"
 
 typedef CGAL::Simple_cartesian<double>               K; // real value type (double)
 typedef K::Point_3                                   Point_3; // point is vector (3) of real
@@ -44,16 +37,16 @@ int main()
     std::cout << "saving input to ply " <<  std::endl;
     ply_write_pcl<pcl::PointXYZ>(cloud_in, "input.ply");
 
-    std::vector<Point_3> V;
     std::cout << "converting vertex to CGAL format" << std::endl;
-    for(int i=0; i<num_points;i++)
+    std::vector<Point_3> V;
+    pcl::PointCloud<pcl::PointXYZ>::iterator begin = cloud_in.points.begin();
+    for(; begin != cloud_in.end(); ++begin)
     {
-        Point_3 p(cloud_in.points[i].x, cloud_in.points[i].y, cloud_in.points[i].z);
-
+        Point_3 p(begin->x, begin->y, begin->z);
         V.push_back(p);
     }
 
-    Polyhedron P; // define polyhedron to hold convex hull
+    Polyhedron P; // define polyhedron to hold convex hull after computation
 
     // compute convex hull
     std::cout << "computing convex hull ... "  << num_points << " points" << std::endl;
