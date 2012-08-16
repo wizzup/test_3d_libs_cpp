@@ -53,6 +53,8 @@ ply_write_cgal(CGAL::Polyhedron_3<T> &poly, std::string file_name)
     ply_file << "property float32 x" << std::endl; // vertex position property 
     ply_file << "property float32 y" << std::endl; // vertex position property 
     ply_file << "property float32 z" << std::endl; // vertex position property 
+    ply_file << "element face " << poly.size_of_facets() << std::endl; // number of vertex in file 
+    ply_file << "property list uchar int vertex_indices" << std::endl; // face list property
     ply_file << "end_header" << std::endl; // end of header
 
     // write vertex position to ply file
@@ -61,11 +63,27 @@ ply_write_cgal(CGAL::Polyhedron_3<T> &poly, std::string file_name)
 
     for(; begin != poly.vertices_end(); ++begin)
     {
-        // use CGAL homogenous coord here
+        // use CGAL homogenous coord here because RT kernel was used
         ply_file   << begin->point().hx()
             << " " << begin->point().hy() 
             << " " << begin->point().hz() << std::endl;
      }
+
+    // // TODO: this style should be better but it appened 1 to each line
+    // std::copy( poly.points_begin(), poly.points_end(),
+    //         std::ostream_iterator<typename T::Point_3>( std::cout, "\n"));
+    
+    for (typename CGAL::Polyhedron_3<T>::Facet_iterator i = poly.facets_begin(); i != poly.facets_end(); ++i) {
+        typename CGAL::Polyhedron_3<T>::Halfedge_around_facet_circulator j = i->facet_begin();
+        
+        // Facets in polyhedral surfaces are at least triangles.
+        CGAL_assertion( CGAL::circulator_size(j) >= 3);
+        ply_file << CGAL::circulator_size(j) << ' ';
+        do {
+            ply_file << ' ' << std::distance(poly.vertices_begin(), j->vertex());
+        } while ( ++j != i->facet_begin());
+        ply_file << std::endl;
+    } 
 
     return 0;
 }

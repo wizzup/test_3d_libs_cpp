@@ -5,37 +5,24 @@
 
 #include "file_util.h"
 
-#include <CGAL/Homogeneous.h>
-#include <CGAL/point_generators_3.h>
+#include <CGAL/Simple_cartesian.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
-#include <CGAL/convex_hull_incremental_3.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
 #include <CGAL/IO/Polyhedron_VRML_1_ostream.h> 
-#include <CGAL/IO/Polyhedron_inventor_ostream.h> 
 
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
-
 
 #include <vector>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 
-// floating point precission stuff
-#ifdef CGAL_USE_GMP
-#include <CGAL/Gmpz.h>
-typedef CGAL::Gmpz RT;
-#else
-#include <CGAL/MP_Float.h>
-typedef CGAL::MP_Float RT;
-#endif
-
-typedef CGAL::Homogeneous<RT>                  K; // real value type
-typedef K::Point_3                             Point_3; // point is vector (3) of real
-typedef CGAL::Polyhedron_3<K>                 Polyhedron; // polyhedron also defined from real value position
+typedef CGAL::Simple_cartesian<double>               K; // real value type (double)
+typedef K::Point_3                                   Point_3; // point is vector (3) of real
+typedef CGAL::Polyhedron_3<K>                        Polyhedron; // polyhedron also defined from real value position
 
 typedef Polyhedron::Facet_iterator                   Facet_iterator;
 typedef Polyhedron::Halfedge_around_facet_circulator Halfedge_facet_circulator;
@@ -71,11 +58,6 @@ int main()
     // compute convex hull
     std::cout << "computing convex hull ... "  << num_points << " points" << std::endl;
     CGAL::convex_hull_3( V.begin(), V.end(), P);
-
-    // output to openinventor file
-    // std::ofstream ofs("output.iv");
-    // CGAL::Inventor_ostream out(ofs);
-    // out << P;
 
     std::cout << "saving output to ply " <<  std::endl;
     ply_write_cgal<K>(P, "output.ply");
